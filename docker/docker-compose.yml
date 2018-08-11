@@ -1,0 +1,49 @@
+version: '2'
+services:
+  ####################################################################################################
+  # Creating container MySQL
+  ####################################################################################################
+  mysql:
+    image: mysql:5.6
+    ports:
+        - "3306:3306"
+    expose:
+        - 3306
+    volumes:
+        - ../mysqldata/:/var/lib/mysql
+    environment:
+        MYSQL_ROOT_PASSWORD: root
+        MYSQL_USER: root
+        MYSQL_PASSWORD: root
+        MYSQL_DATABASE: test_develop
+
+  ####################################################################################################
+  # The Application
+  ####################################################################################################
+  app:
+    build:
+      context: ./
+      dockerfile: app.dockerfile
+    working_dir: /var/www
+    volumes:
+      - ../projects/lumen/:/var/www
+    ports:
+        - "9000:9000"
+    links:
+        - mysql
+
+  ####################################################################################################
+  # The Web Server
+  ####################################################################################################
+  web:
+    build:
+      context: ./
+      dockerfile: web.dockerfile
+    working_dir: /var/www
+    volumes_from:
+      - app
+    ports:
+      - 80:80
+
+volumes:
+  dbdata:
